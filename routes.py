@@ -19,7 +19,7 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    if 'user_id' not in session:
+    if not current_user.is_authenticated:
         return redirect(url_for('login'))
     return redirect(url_for('home'))
 
@@ -32,8 +32,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         if user and check_password_hash(user.password_hash, password):
-            session['user_id'] = user.id
-            session['username'] = user.username
+            login_user(user)
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
         else:
@@ -43,7 +42,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.clear()
+    logout_user()
     flash('You have been logged out', 'info')
     return redirect(url_for('login'))
 
@@ -77,7 +76,7 @@ def detect():
         
         # Create detection job record
         job = DetectionJob(
-            user_id=session['user_id'],
+            user_id=current_user.id,
             filename=filename,
             original_filename=file.filename,
             status='processing'
@@ -95,7 +94,7 @@ def detect():
 @login_required
 def loading(job_id):
     job = DetectionJob.query.get_or_404(job_id)
-    if job.user_id != session['user_id']:
+    if job.user_id != current_user.id:
         flash('Access denied', 'error')
         return redirect(url_for('home'))
     
@@ -105,7 +104,7 @@ def loading(job_id):
 @login_required
 def process_detection(job_id):
     job = DetectionJob.query.get_or_404(job_id)
-    if job.user_id != session['user_id']:
+    if job.user_id != current_user.id:
         return jsonify({'error': 'Access denied'}), 403
     
     if job.status == 'completed':
@@ -141,7 +140,7 @@ def process_detection(job_id):
 @login_required
 def results(job_id):
     job = DetectionJob.query.get_or_404(job_id)
-    if job.user_id != session['user_id']:
+    if job.user_id != current_user.id:
         flash('Access denied', 'error')
         return redirect(url_for('home'))
     
