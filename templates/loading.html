@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Processing - YOLOv8 Detection{% endblock %}
+
+{% block content %}
+<div class="loading-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <div class="loading-content">
+                    <!-- AI Brain Animation -->
+                    <div class="ai-brain">
+                        <div class="brain-core">
+                            <div class="neural-network">
+                                <div class="node node-1"></div>
+                                <div class="node node-2"></div>
+                                <div class="node node-3"></div>
+                                <div class="node node-4"></div>
+                                <div class="node node-5"></div>
+                                <div class="connection connection-1"></div>
+                                <div class="connection connection-2"></div>
+                                <div class="connection connection-3"></div>
+                                <div class="connection connection-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Text -->
+                    <h2 class="loading-title">AI is Analyzing Your Media</h2>
+                    <p class="loading-subtitle" id="loadingText">Initializing neural networks...</p>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-animated" id="progressBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="progressPercent">0%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Processing Steps -->
+                    <div class="processing-steps">
+                        <div class="step active" id="step1">
+                            <i class="fas fa-upload"></i>
+                            <span>Uploading</span>
+                        </div>
+                        <div class="step" id="step2">
+                            <i class="fas fa-cog"></i>
+                            <span>Processing</span>
+                        </div>
+                        <div class="step" id="step3">
+                            <i class="fas fa-eye"></i>
+                            <span>Detecting</span>
+                        </div>
+                        <div class="step" id="step4">
+                            <i class="fas fa-check"></i>
+                            <span>Complete</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Fun Facts -->
+                    <div class="fun-facts mt-4">
+                        <div class="fact-item">
+                            <h4 id="factTitle">Did you know?</h4>
+                            <p id="factContent">YOLOv8 can detect objects in real-time at 30+ FPS!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jobId = {{ job_id }};
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const loadingText = document.getElementById('loadingText');
+    
+    const loadingMessages = [
+        "Initializing neural networks...",
+        "Loading YOLOv8 model...",
+        "Preprocessing your media...",
+        "Running object detection...",
+        "Analyzing detected objects...",
+        "Finalizing results..."
+    ];
+    
+    const funFacts = [
+        {
+            title: "Did you know?",
+            content: "YOLOv8 can detect objects in real-time at 30+ FPS!"
+        },
+        {
+            title: "Amazing Fact!",
+            content: "YOLO stands for 'You Only Look Once' - it processes the entire image in one pass!"
+        },
+        {
+            title: "Impressive!",
+            content: "YOLOv8 can identify over 80 different object classes simultaneously!"
+        },
+        {
+            title: "Cool Feature!",
+            content: "Our AI model was trained on millions of images for maximum accuracy!"
+        }
+    ];
+    
+    let currentStep = 1;
+    let progress = 0;
+    let messageIndex = 0;
+    let factIndex = 0;
+    
+    // Simulate progress
+    function updateProgress() {
+        progress += Math.random() * 15 + 5;
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = progress + '%';
+        progressPercent.textContent = Math.round(progress) + '%';
+        
+        // Update loading message
+        if (messageIndex < loadingMessages.length) {
+            loadingText.textContent = loadingMessages[messageIndex];
+            messageIndex++;
+        }
+        
+        // Update steps
+        updateSteps();
+        
+        if (progress >= 100) {
+            // Check if processing is complete
+            checkProcessingStatus();
+        } else {
+            setTimeout(updateProgress, 800 + Math.random() * 400);
+        }
+    }
+    
+    function updateSteps() {
+        const stepProgress = progress / 25;
+        const newStep = Math.min(Math.floor(stepProgress) + 1, 4);
+        
+        if (newStep > currentStep) {
+            // Deactivate current step
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${currentStep}`).classList.add('completed');
+            
+            // Activate new step
+            currentStep = newStep;
+            if (currentStep <= 4) {
+                document.getElementById(`step${currentStep}`).classList.add('active');
+            }
+        }
+    }
+    
+    function rotateFacts() {
+        const factTitle = document.getElementById('factTitle');
+        const factContent = document.getElementById('factContent');
+        
+        factIndex = (factIndex + 1) % funFacts.length;
+        factTitle.textContent = funFacts[factIndex].title;
+        factContent.textContent = funFacts[factIndex].content;
+    }
+    
+    function checkProcessingStatus() {
+        fetch(`/process/${jobId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'completed') {
+                    // Mark final step as completed
+                    document.getElementById('step4').classList.remove('active');
+                    document.getElementById('step4').classList.add('completed');
+                    
+                    loadingText.textContent = 'Processing complete! Redirecting...';
+                    
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1000);
+                } else if (data.status === 'failed') {
+                    loadingText.textContent = 'Processing failed: ' + (data.error || 'Unknown error');
+                    progressBar.classList.add('bg-danger');
+                } else {
+                    // Still processing, check again
+                    setTimeout(checkProcessingStatus, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking status:', error);
+                setTimeout(checkProcessingStatus, 2000);
+            });
+    }
+    
+    // Start progress simulation
+    setTimeout(updateProgress, 500);
+    
+    // Rotate fun facts every 4 seconds
+    setInterval(rotateFacts, 4000);
+});
+</script>
+{% endblock %}

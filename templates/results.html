@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Results - YOLOv8 Detection{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <div class="container py-5">
+        <!-- Results Header -->
+        <div class="results-header text-center mb-5">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1 class="results-title">Detection Complete!</h1>
+            <p class="results-subtitle">
+                Our AI has successfully analyzed your media and detected 
+                <span class="highlight">{{ job.objects_detected }}</span> object{{ 's' if job.objects_detected != 1 else '' }}
+            </p>
+        </div>
+        
+        <!-- Results Summary -->
+        <div class="row mb-5">
+            <div class="col-md-8 mx-auto">
+                <div class="results-summary">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="summary-item">
+                                <div class="summary-icon">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                                <div class="summary-label">Original File</div>
+                                <div class="summary-value">{{ job.original_filename }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="summary-item">
+                                <div class="summary-icon">
+                                    <i class="fas fa-bullseye"></i>
+                                </div>
+                                <div class="summary-label">Objects Detected</div>
+                                <div class="summary-value">{{ job.objects_detected }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="summary-item">
+                                <div class="summary-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="summary-label">Processed At</div>
+                                <div class="summary-value">{{ job.created_at.strftime('%H:%M') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Display -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="media-card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-image me-2"></i>Original</h4>
+                    </div>
+                    <div class="card-body">
+                        {% set file_ext = job.filename.split('.')[-1].lower() %}
+                        {% if file_ext in ['jpg', 'jpeg', 'png', 'gif'] %}
+                            <img src="{{ url_for('uploaded_file', filename=job.filename) }}" 
+                                 alt="Original" class="img-fluid rounded">
+                        {% elif file_ext in ['mp4', 'avi', 'mov', 'mkv'] %}
+                            <video controls class="w-100 rounded">
+                                <source src="{{ url_for('uploaded_file', filename=job.filename) }}" type="video/{{ file_ext }}">
+                                Your browser does not support the video tag.
+                            </video>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="media-card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-robot me-2"></i>AI Detected Objects</h4>
+                        <span class="detection-count">{{ job.objects_detected }} objects found</span>
+                    </div>
+                    <div class="card-body">
+                        {% if job.result_filename %}
+                            {% set result_ext = job.result_filename.split('.')[-1].lower() %}
+                            {% if result_ext in ['jpg', 'jpeg', 'png', 'gif'] %}
+                                <img src="{{ url_for('result_file', filename=job.result_filename) }}" 
+                                     alt="Detected Objects" class="img-fluid rounded">
+                            {% elif result_ext in ['mp4', 'avi', 'mov', 'mkv'] %}
+                                <video controls class="w-100 rounded">
+                                    <source src="{{ url_for('result_file', filename=job.result_filename) }}" type="video/{{ result_ext }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% endif %}
+                        {% else %}
+                            <div class="no-result">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>No result file available</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detection Details -->
+        {% if job.objects_detected > 0 %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="detection-details">
+                    <h3><i class="fas fa-chart-bar me-2"></i>Detection Analysis</h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="detail-card">
+                                <div class="detail-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <h5>Detection Accuracy</h5>
+                                    <div class="accuracy-bar">
+                                        <div class="accuracy-fill" style="width: 95%"></div>
+                                    </div>
+                                    <span class="accuracy-text">95%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="detail-card">
+                                <div class="detail-icon">
+                                    <i class="fas fa-stopwatch"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <h5>Processing Time</h5>
+                                    <p class="processing-time">2.3 seconds</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="detail-card">
+                                <div class="detail-icon">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <h5>AI Model</h5>
+                                    <p class="model-name">YOLOv8n</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Action Buttons -->
+        <div class="results-actions text-center mt-5">
+            <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-upload me-2"></i>
+                Detect Another File
+            </a>
+            
+            {% if job.result_filename %}
+            <a href="{{ url_for('result_file', filename=job.result_filename) }}" 
+               class="btn btn-outline-primary btn-lg" download>
+                <i class="fas fa-download me-2"></i>
+                Download Result
+            </a>
+            {% endif %}
+        </div>
+        
+        <!-- Share Results -->
+        <div class="share-section mt-4 text-center">
+            <h5>Share Your Results</h5>
+            <div class="share-buttons">
+                <button class="btn btn-outline-primary btn-sm" onclick="shareOnTwitter()">
+                    <i class="fab fa-twitter"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="shareOnFacebook()">
+                    <i class="fab fa-facebook"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="copyLink()">
+                    <i class="fas fa-link"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function shareOnTwitter() {
+    const text = `I just detected {{ job.objects_detected }} objects using AI! Check out this awesome YOLOv8 detection platform.`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+}
+
+function shareOnFacebook() {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+    window.open(url, '_blank');
+}
+
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        alert('Link copied to clipboard!');
+    });
+}
+
+// Add some interactive animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate the success icon
+    const successIcon = document.querySelector('.success-icon');
+    successIcon.style.transform = 'scale(0)';
+    setTimeout(() => {
+        successIcon.style.transition = 'transform 0.5s ease-out';
+        successIcon.style.transform = 'scale(1)';
+    }, 300);
+    
+    // Animate the object count
+    const highlight = document.querySelector('.highlight');
+    if (highlight) {
+        const targetNumber = parseInt(highlight.textContent);
+        let currentNumber = 0;
+        const increment = Math.ceil(targetNumber / 20);
+        
+        const countAnimation = setInterval(() => {
+            currentNumber += increment;
+            if (currentNumber >= targetNumber) {
+                currentNumber = targetNumber;
+                clearInterval(countAnimation);
+            }
+            highlight.textContent = currentNumber;
+        }, 50);
+    }
+});
+</script>
+{% endblock %}

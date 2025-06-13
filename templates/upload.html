@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Upload - YOLOv8 Detection{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="upload-header text-center mb-5">
+                    <h1 class="upload-title">
+                        <i class="fas fa-cloud-upload-alt me-3"></i>
+                        Upload Your Media
+                    </h1>
+                    <p class="upload-subtitle">
+                        Upload an image or video to detect objects using our advanced YOLOv8 AI model
+                    </p>
+                </div>
+                
+                <div class="upload-card">
+                    <form action="{{ url_for('detect') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="upload-zone" id="uploadZone">
+                            <div class="upload-zone-content">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h4>Drag & Drop Your File Here</h4>
+                                <p class="text-muted">or click to browse</p>
+                                <input type="file" name="file" id="fileInput" class="file-input" accept="image/*,video/*" required>
+                                
+                                <div class="upload-info mt-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="info-item">
+                                                <i class="fas fa-image text-primary"></i>
+                                                <span>Images: JPG, PNG, GIF</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="info-item">
+                                                <i class="fas fa-video text-primary"></i>
+                                                <span>Videos: MP4, AVI, MOV</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">Maximum file size: 50MB</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="file-preview" id="filePreview" style="display: none;">
+                            <div class="preview-header">
+                                <h5>Selected File</h5>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearFile()">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                            <div class="preview-content">
+                                <div class="file-info">
+                                    <div class="file-icon">
+                                        <i class="fas fa-file"></i>
+                                    </div>
+                                    <div class="file-details">
+                                        <div class="file-name" id="fileName"></div>
+                                        <div class="file-size" id="fileSize"></div>
+                                    </div>
+                                </div>
+                                <div class="file-preview-image" id="previewImage"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-actions text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                                <i class="fas fa-robot me-2"></i>
+                                Start AI Detection
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Detection Capabilities -->
+                <div class="capabilities-section mt-5">
+                    <h3 class="text-center mb-4">What Can We Detect?</h3>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="capability-item">
+                                <i class="fas fa-user"></i>
+                                <span>People</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="capability-item">
+                                <i class="fas fa-car"></i>
+                                <span>Vehicles</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="capability-item">
+                                <i class="fas fa-paw"></i>
+                                <span>Animals</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="capability-item">
+                                <i class="fas fa-home"></i>
+                                <span>Objects</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <small class="text-muted">And 70+ more object categories!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const previewImage = document.getElementById('previewImage');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Drag and drop functionality
+    uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+    });
+    
+    uploadZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+    });
+    
+    uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+    
+    // Click to upload
+    uploadZone.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            handleFileSelect(this.files[0]);
+        }
+    });
+    
+    function handleFileSelect(file) {
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        
+        if (file.size > maxSize) {
+            alert('File is too large. Maximum size is 50MB.');
+            return;
+        }
+        
+        // Update file info
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        // Show preview
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-thumbnail">`;
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+            previewImage.innerHTML = '<div class="video-preview"><i class="fas fa-video"></i><span>Video file selected</span></div>';
+        }
+        
+        // Show preview section
+        filePreview.style.display = 'block';
+        uploadZone.style.display = 'none';
+        submitBtn.disabled = false;
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    window.clearFile = function() {
+        fileInput.value = '';
+        filePreview.style.display = 'none';
+        uploadZone.style.display = 'block';
+        submitBtn.disabled = true;
+        previewImage.innerHTML = '';
+    };
+});
+</script>
+{% endblock %}

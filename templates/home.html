@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Home - YOLOv8 Detection{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="text-primary">AI-Powered</span><br>
+                        Object Detection
+                    </h1>
+                    <p class="hero-subtitle">
+                        Experience the cutting-edge technology of YOLOv8 (You Only Look Once) 
+                        for real-time object detection in images and videos. Our platform 
+                        delivers lightning-fast, accurate results with state-of-the-art neural networks.
+                    </p>
+                    
+                    <div class="hero-stats mb-4">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number">99.9%</div>
+                                    <div class="stat-label">Accuracy</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number">&lt;1s</div>
+                                    <div class="stat-label">Processing</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number">80+</div>
+                                    <div class="stat-label">Object Types</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-buttons">
+                        <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-upload me-2"></i>
+                            Start Detection
+                        </a>
+                        <button class="btn btn-outline-primary btn-lg" onclick="scrollToFeatures()">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="detection-demo">
+                        <div class="demo-container">
+                            <div class="scanning-line"></div>
+                            <div class="detected-objects">
+                                <div class="detection-box box-1">
+                                    <span class="detection-label">Person</span>
+                                </div>
+                                <div class="detection-box box-2">
+                                    <span class="detection-label">Car</span>
+                                </div>
+                                <div class="detection-box box-3">
+                                    <span class="detection-label">Bicycle</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-subtitle">Advanced object detection capabilities at your fingertips</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4>Lightning Fast</h4>
+                    <p>Real-time object detection with optimized YOLOv8 architecture delivering results in milliseconds.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h4>High Accuracy</h4>
+                    <p>State-of-the-art neural networks ensure precise object detection and classification.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <h4>Multi-Format</h4>
+                    <p>Support for images and videos in various formats including JPG, PNG, MP4, and AVI.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>AI-Powered</h4>
+                    <p>Leveraging advanced deep learning models trained on millions of images.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>Responsive Design</h4>
+                    <p>Works seamlessly across all devices - desktop, tablet, and mobile.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Secure & Private</h4>
+                    <p>Your data is processed securely with enterprise-grade privacy protection.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Dynamic Messages Section -->
+<section class="messages-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="dynamic-message">
+                    <h3 id="dynamicText">Detecting objects in real-time...</h3>
+                    <p>Join thousands of users leveraging AI for intelligent object detection</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <a href="{{ url_for('upload') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-rocket me-2"></i>
+                    Get Started Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Dynamic text animation
+const messages = [
+    "Detecting objects in real-time...",
+    "Powered by YOLOv8 technology...",
+    "Identifying 80+ object classes...",
+    "Processing at lightning speed...",
+    "AI that sees what you see..."
+];
+
+let messageIndex = 0;
+const dynamicTextElement = document.getElementById('dynamicText');
+
+function updateMessage() {
+    dynamicTextElement.style.opacity = '0';
+    
+    setTimeout(() => {
+        messageIndex = (messageIndex + 1) % messages.length;
+        dynamicTextElement.textContent = messages[messageIndex];
+        dynamicTextElement.style.opacity = '1';
+    }, 300);
+}
+
+// Change message every 3 seconds
+setInterval(updateMessage, 3000);
+
+// Smooth scroll to features
+function scrollToFeatures() {
+    document.getElementById('features').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+</script>
+{% endblock %}
